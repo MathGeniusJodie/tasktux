@@ -3,6 +3,7 @@ import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import Todo from "./components/Todo";
 import { ToggleGroup, ToggleGroupItem } from "./components/ui/toggle-group";
+import { Switch } from "./components/ui/switch";
 
 // Define the todo type
 export type Todos = {
@@ -11,6 +12,7 @@ export type Todos = {
   completed: boolean;
   createdAt: number;
   storyPoints?: number;
+  backburner?: boolean;
 };
 
 const possibleStoryPoints = ["1", "2", "3", "5", "8", "13"];
@@ -22,6 +24,7 @@ function App() {
   const [todoIds, setTodoIds] = useState<string[]>([]);
   const [newTodo, setNewTodo] = useState<string>("");
   const [storyPoint, setStoryPoint] = useState<string>("1");
+  const [backburner, setBackburner] = useState<boolean>(false);
 
   // Add a new todo
   const addTodo = () => {
@@ -34,9 +37,11 @@ function App() {
       completed: false,
       createdAt: Date.now(),
       storyPoints: Number(storyPoint) || 1,
+      backburner: backburner,
     };
     setTodosById((prev) => ({ ...prev, [id]: todo }));
     setTodoIds((prev) => [...prev, id]);
+    setBackburner(false);
     setNewTodo("");
     setStoryPoint("1");
   };
@@ -84,7 +89,7 @@ function App() {
             Quick Add
           </Button>
         </form>
-        <form className="flex-col gap-4">
+        <form className="flex flex-col gap-4">
           <label className="flex flex-col justify-stretch gap-2">
             <span className="text-sm text-secondary-foreground">Story Points</span>
             <ToggleGroup
@@ -104,6 +109,19 @@ function App() {
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
+          </label>
+          <label className="flex flex-col justify-stretch gap-2">
+            <span className="text-sm text-secondary-foreground">
+              Backburner
+            </span>
+            <Switch
+              id="backburner"
+              checked={backburner}
+              onCheckedChange={(checked) => {
+                setBackburner(checked);
+              }
+              }
+            />  
           </label>
         </form>
       </div>
