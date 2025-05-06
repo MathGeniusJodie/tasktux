@@ -1,47 +1,38 @@
 import React, { useState } from "react";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
-import Todo from "./components/Todo";
+import { Todo, TodoListItem } from "./components/Todo";
 import { ToggleGroup, ToggleGroupItem } from "./components/ui/toggle-group";
 import { Switch } from "./components/ui/switch";
-
-// Define the todo type
-export type Todos = {
-  id: string;
-  text: string;
-  completed: boolean;
-  createdAt: number;
-  storyPoints?: number;
-  backburner?: boolean;
-};
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 const possibleStoryPoints = ["1", "2", "3", "5", "8", "13"];
 
-type TodosById = { [id: string]: Todos };
+type TodosById = { [id: string]: Todo };
 
 function App() {
-  const [todosById, setTodosById] = useState<TodosById>({});
-  const [todoIds, setTodoIds] = useState<string[]>([]);
+  const [todosById, setTodosById] = useLocalStorage("todos", {} as TodosById);
+  const [todoIds, setTodoIds] = useState<string[]>(Object.keys(todosById));
   const [newTodo, setNewTodo] = useState<string>("");
   const [storyPoint, setStoryPoint] = useState<string>("1");
-  const [backburner, setBackburner] = useState<boolean>(false);
+  const [priority, setPriority] = useState<string>("1");
 
   // Add a new todo
   const addTodo = () => {
     const text = newTodo.trim();
     if (!text) return;
     const id = Date.now().toString();
-    const todo: Todos = {
+    const todo: Todo = {
       id,
       text,
       completed: false,
       createdAt: Date.now(),
       storyPoints: Number(storyPoint) || 1,
-      backburner: backburner,
+      priority: Number(priority) || 1,
     };
     setTodosById((prev) => ({ ...prev, [id]: todo }));
     setTodoIds((prev) => [...prev, id]);
-    setBackburner(false);
+    setPriority("1");
     setNewTodo("");
     setStoryPoint("1");
   };
@@ -57,10 +48,11 @@ function App() {
   // Delete a todo
   const deleteTodo = (id: string) => {
     setTodosById((prev) => {
-      const { [id]: _, ...rest } = prev;
-      return rest;
+      const curr = { ...prev };
+      delete curr[id];
+      return curr;
     });
-    setTodoIds((prev) => prev.filter((tid) => tid !== id));
+    setTodoIds((prev) => prev.filter((todoId) => todoId !== id));
   };
 
   // Sorted todos (by createdAt asc)
@@ -91,7 +83,9 @@ function App() {
         </form>
         <form className="flex flex-col gap-4">
           <label className="flex flex-col justify-stretch gap-2">
-            <span className="text-sm text-secondary-foreground">Story Points</span>
+            <span className="text-sm text-secondary-foreground">
+              Story Points
+            </span>
             <ToggleGroup
               type="single"
               variant={"outline"}
@@ -111,18 +105,35 @@ function App() {
             </ToggleGroup>
           </label>
           <label className="flex flex-col justify-stretch gap-2">
-            <span className="text-sm text-secondary-foreground">
-              Backburner
-            </span>
-            <Switch
-              id="backburner"
-              checked={backburner}
-              onCheckedChange={(checked) => {
-                setBackburner(checked);
-              }
-              }
-            />  
+            <span className="text-sm text-secondary-foreground">Priority</span>
+            <ToggleGroup
+              type="single"
+              variant={"outline"}
+              value={priority}
+              onValueChange={(val) => setPriority(val || "1")}
+              className="flex w-auto"
+            >
+              <ToggleGroupItem
+                value="0"
+                className="flex items-center justify-center"
+              >
+                Backburner
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="1"
+                className="flex items-center justify-center"
+              >
+                Normal
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="2"
+                className="flex items-center justify-center"
+              >
+                Important
+              </ToggleGroupItem>
+            </ToggleGroup>
           </label>
+          <Button onClick={addTodo}>Add</Button>
         </form>
       </div>
 
@@ -133,7 +144,7 @@ function App() {
           </p>
         ) : (
           todos.map((todo) => (
-            <Todo
+            <TodoListItem
               key={todo.id}
               todo={todo}
               toggleTodo={toggleTodo}
