@@ -12,6 +12,7 @@ export type Todo = {
   createdAt: number;
   storyPoints?: number;
   priority?: number;
+  tagged?: string[]; // todo: make enum for tags or untagged
 };
 
 type TodoProps = {
