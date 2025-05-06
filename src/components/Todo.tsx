@@ -4,16 +4,21 @@ import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { Trash } from "lucide-react";
 
-// Define the todo type
-export type Todo = {
+type BaseTodo = {
   id: string;
   text: string;
   completed: boolean;
   createdAt: number;
-  storyPoints?: number;
-  priority?: number;
-  tagged?: string[]; // todo: make enum for tags or untagged
 };
+
+type UntaggedTodo = BaseTodo;
+type TaggedTodo = BaseTodo & {
+  storyPoints: number;
+  priority: number;
+};
+
+// Define the todo type
+export type Todo = UntaggedTodo | TaggedTodo;
 
 type TodoProps = {
   todo: Todo;
