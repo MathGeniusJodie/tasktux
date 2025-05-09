@@ -81,7 +81,7 @@ function App() {
             Quick Add
           </Button>
         </form>
-        <form className="flex flex-col gap-4">
+        <form className="flex flex-col gap-4 py-4">
           <label className="flex flex-col justify-stretch gap-2">
             <span className="text-sm text-secondary-foreground">
               Story Points
