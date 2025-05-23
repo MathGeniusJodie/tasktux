@@ -5,8 +5,14 @@ import { Todo, TodoListItem } from "./components/Todo";
 import { ToggleGroup, ToggleGroupItem } from "./components/ui/toggle-group";
 import { Switch } from "./components/ui/switch";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { Calendar } from "./components/ui/calendar";
+import { penguinQuotes } from "./penguinQuotes";
+import { Settings } from "lucide-react";
 
-const possibleStoryPoints = ["1", "2", "3", "5", "8", "13"];
+const possibleStoryPoints = ["🤷", "1", "2", "3", "5", "8", "13"];
+
+const randomQuote =
+  penguinQuotes[Math.floor(Math.random() * penguinQuotes.length)];
 
 type TodosById = { [id: string]: Todo };
 
@@ -16,6 +22,8 @@ function App() {
   const [newTodo, setNewTodo] = useState<string>("");
   const [storyPoint, setStoryPoint] = useState<string>("1");
   const [priority, setPriority] = useState<string>("1");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   // Add a new todo
   const addTodo = () => {
@@ -28,13 +36,18 @@ function App() {
       completed: false,
       createdAt: Date.now(),
       storyPoints: Number(storyPoint) || 1,
-      priority: Number(priority) || 1,
+      priority: Number(priority) || undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
     };
+
     setTodosById((prev) => ({ ...prev, [id]: todo }));
     setTodoIds((prev) => [...prev, id]);
     setPriority("1");
     setNewTodo("");
     setStoryPoint("1");
+    setStartDate(undefined);
+    setEndDate(undefined);
   };
 
   // Toggle todo completion
@@ -63,9 +76,29 @@ function App() {
 
   return (
     <>
+      <header className="flex flex-col items-center gap-2 py-6">
+        <div className="flex items-center gap-4 flex-row-reverse">
+          <button>
+            <Settings className="h-6 w-6 text-yellow-500" />
+          </button>
+          <span
+            style={{ fontSize: "4rem" }}
+            role="img"
+            aria-label="Tux says: "
+          >
+            🐧
+          </span>
+          <div className="relative">
+            <div className="bg-white border border-gray-300 rounded-xl px-6 py-3 shadow text-lg font-semibold text-gray-800 min-w-[200px] max-w-xs rounded-tr-none">
+              {randomQuote}
+            </div>
+          </div>
+        </div>
+      </header>
+
       <div className="flex gap-4 flex-col">
         <form
-          className="h-32 flex items-center gap-4 flex-grow"
+          className="flex items-center gap-4 flex-grow"
           onSubmit={(e) => {
             e.preventDefault();
             addTodo();
@@ -81,7 +114,13 @@ function App() {
             Quick Add
           </Button>
         </form>
-        <form className="flex flex-col gap-4 py-4">
+        <form
+          className="flex flex-col gap-4 py-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            addTodo();
+          }}
+        >
           <label className="flex flex-col justify-stretch gap-2">
             <span className="text-sm text-secondary-foreground">
               Story Points
@@ -133,7 +172,40 @@ function App() {
               </ToggleGroupItem>
             </ToggleGroup>
           </label>
-          <Button onClick={addTodo}>Add</Button>
+          <details>
+            <summary>Dates</summary>
+            <div className="flex items-center gap-2">
+              <label className="flex flex-col justify-stretch gap-2">
+                <span className="text-sm text-secondary-foreground">Start</span>
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setStartDate(date);
+                    }
+                  }}
+                  className="w-auto"
+                />
+              </label>
+              <label className="flex flex-col justify-stretch gap-2">
+                <span className="text-sm text-secondary-foreground">
+                  Deadline
+                </span>
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setEndDate(date);
+                    }
+                  }}
+                  className="w-auto"
+                />
+              </label>
+            </div>
+          </details>
+          <Button type="submit">Add</Button>
         </form>
       </div>
 

@@ -13,8 +13,10 @@ type BaseTodo = {
 
 type UntaggedTodo = BaseTodo;
 type TaggedTodo = BaseTodo & {
-  storyPoints: number;
-  priority: number;
+  storyPoints?: number;
+  priority?: number;
+  startDate?: Date;
+  endDate?: Date;
 };
 
 // Define the todo type
