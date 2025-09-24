@@ -10,7 +10,7 @@ import { penguinQuotes } from "./penguinQuotes";
 import { Settings } from "lucide-react";
 import { add } from "date-fns";
 
-const possibleStoryPoints = ["🤷", "1", "2", "3", "5", "8", "13"];
+const possibleStoryPoints = ["🤷", "1", "2", "3", "5", "8"];
 
 const randomQuote =
   penguinQuotes[Math.floor(Math.random() * penguinQuotes.length)];
@@ -108,12 +108,12 @@ function App() {
       // sort by priority first, then by createdAt
       if ("priority" in a && "priority" in b) {
         if (a.priority !== b.priority) {
-          return (b.priority || 0) - (a.priority || 0); // higher priority first
+          return (b.priority ?? 1) - (a.priority ?? 1); // higher priority first
         }
       } else if ("priority" in a) {
-        return 1; // a has priority, b doesn't
+        return 1 - (a.priority ?? 1);
       } else if ("priority" in b) {
-        return -1; // b has priority, a doesn't
+        return (b.priority ?? 1) - 1;
       }
       return a.createdAt - b.createdAt;
     });
@@ -144,11 +144,12 @@ function App() {
 
   return (
     <>
-      <header className="flex flex-col items-center gap-2 py-6">
-        <div className="flex items-center gap-4 flex-row-reverse">
+      <header className="flex flex-col items-center gap-2 py-6 w-full">
+        <div className="flex items-center gap-4 flex-row-reverse justify-between w-full">
           <button>
             <Settings className="h-6 w-6 text-yellow-500" />
           </button>
+          <div className="flex items-center flex-row-reverse gap-4">
           <span
             style={{ fontSize: "4rem" }}
             role="img"
@@ -161,14 +162,27 @@ function App() {
               {randomQuote}
             </div>
           </div>
-          <div className="text-sm text-center">
-            <div className="font-bold">Points Completed:</div>
+          </div>
+          <div className="text-center font-bold">
+            <div>Points:</div>
             <div className="font-mono text-3xl">{todos.reduce((acc, todo) => acc + (todo.completed ? "storyPoints" in todo && todo.storyPoints || 1 : 0), 0)}</div>
           </div>
         </div>
       </header>
 
-      <div className="flex gap-4 flex-col">
+      <div className="text-xl border-white border-3 bg-black px-3 rounded-xl relative font-bold -mb-15 -mx-10 w-max">Do This First!</div>
+      <TodoListItem
+        todo={todos[0]}
+        toggleTodo={toggleTodo}
+        deleteTodo={deleteTodo}
+        updateTodo={updateTodo}
+        //box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+        className="border-4 rounded-lg my-10 border-white -mx-14 h-28 p-8 gap-6 shadow-[0_0_30px_var(--color-yellow-900)] inset-shadow-[0_0_30px_var(--color-yellow-900)]"
+        labelClassName="text-2xl"
+        checkClassName="size-8 border-3 border-white"
+      />
+
+      <div className="flex gap-4 flex-col border-4 p-4 rounded-lg mb-4 border-yellow-400">
         <form
           className="flex items-center gap-4 flex-grow"
           onSubmit={(e) => {
@@ -182,6 +196,7 @@ function App() {
             placeholder="Add a new todo..."
             className="flex-grow"
             id="new-todo-title-input"
+            autoFocus
           />
           <Button className="w-32" type="submit" tabIndex={-1}>
             Quick Add
@@ -291,7 +306,8 @@ function App() {
             No todos yet. Add one above!
           </p>
         ) : (
-          todos.map((todo) => (
+          todos.map((todo,index) => (
+            index?
             <TodoListItem
               key={todo.id}
               todo={todo}
@@ -299,6 +315,7 @@ function App() {
               deleteTodo={deleteTodo}
               updateTodo={updateTodo}
             />
+            : null
           ))
         )}
       </div>
