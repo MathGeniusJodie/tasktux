@@ -102,6 +102,9 @@ function App() {
     .map((id) => todosById[id])
     .filter(Boolean)
     .sort((a, b) => {
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1; // incomplete first
+      }
       // sort by priority first, then by createdAt
       if ("priority" in a && "priority" in b) {
         if (a.priority !== b.priority) {

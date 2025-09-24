@@ -111,7 +111,7 @@ export const TodoListItem: React.FC<TodoProps> = ({ todo, toggleTodo, deleteTodo
         <label className="text-sm text-secondary-foreground">Priority</label>
         <ToggleGroup
           type="single"
-          className="w-full"
+          className="w-full mb-4 mt-2"
           defaultValue={("priority" in todo && todo.priority !== undefined ? String(todo.priority) : undefined)}
           aria-label="Priority"
           onValueChange={(value) => {
@@ -129,15 +129,15 @@ export const TodoListItem: React.FC<TodoProps> = ({ todo, toggleTodo, deleteTodo
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => deleteTodo(todo.id)}
+        >
+          Delete Todo
+        </Button>
         {/* allow changing title of todo */}
       </PopoverContent>
     </Popover>
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={() => deleteTodo(todo.id)}
-    >
-      <Trash className="h-4 w-4" />
-    </Button>
   </div>
 );
