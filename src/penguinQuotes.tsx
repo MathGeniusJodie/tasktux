@@ -40,7 +40,7 @@ export const penguinQuotes = [
   "Celebrate small wins",
   "Bad feelings are optional",
   "Romanticise your own life",
-  "You don't deserve anything, but it's ok to have things you don't deserve",
+  "It's ok to have things you don't deserve",
   "Find convoluted reasons for why whatever emotion you're feeling is good for productivity",
   "Don't be attached to outcomes",
   "Stop doing things you know you shouldn't be doing",

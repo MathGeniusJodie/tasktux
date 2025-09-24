@@ -8,6 +8,7 @@ import { useLocalStorage } from "@uidotdev/usehooks";
 import { Calendar } from "./components/ui/calendar";
 import { penguinQuotes } from "./penguinQuotes";
 import { Settings } from "lucide-react";
+import { add } from "date-fns";
 
 const possibleStoryPoints = ["🤷", "1", "2", "3", "5", "8", "13"];
 
@@ -20,7 +21,7 @@ function App() {
   const [todosById, setTodosById] = useLocalStorage("todos", {} as TodosById);
   const [todoIds, setTodoIds] = useState<string[]>(Object.keys(todosById));
   const [newTodo, setNewTodo] = useState<string>("");
-  const [storyPoint, setStoryPoint] = useState<string>("1");
+  const [storyPoint, setStoryPoint] = useState<string>("🤷");
   const [priority, setPriority] = useState<string>("1");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -36,7 +37,7 @@ function App() {
       completed: false,
       createdAt: Date.now(),
       storyPoints: Number(storyPoint) || 1,
-      priority: Number(priority) || undefined,
+      priority: Number(priority),
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     };
@@ -45,9 +46,30 @@ function App() {
     setTodoIds((prev) => [...prev, id]);
     setPriority("1");
     setNewTodo("");
-    setStoryPoint("1");
+    setStoryPoint("🤷");
     setStartDate(undefined);
     setEndDate(undefined);
+    // Focus back to input
+    document.getElementById("new-todo-title-input")?.focus();
+  };
+
+  const quickAddTodo = () => {
+    // add untagged todo
+    const text = newTodo.trim();
+    if (!text) return;
+    const id = Date.now().toString();
+    const todo: Todo = {
+      id,
+      text,
+      completed: false,
+      createdAt: Date.now(),
+    };
+
+    setTodosById((prev) => ({ ...prev, [id]: todo }));
+    setTodoIds((prev) => [...prev, id]);
+    setNewTodo("");
+    // Focus back to input
+    document.getElementById("new-todo-title-input")?.focus();
   };
 
   // Toggle todo completion
@@ -55,6 +77,13 @@ function App() {
     setTodosById((prev) => ({
       ...prev,
       [id]: { ...prev[id], completed: !completed },
+    }));
+  };
+
+  const updateTodo = (id: string, updates: Partial<Todo>) => {
+    setTodosById((prev) => ({
+      ...prev,
+      [id]: { ...prev[id], ...updates },
     }));
   };
 
@@ -72,7 +101,43 @@ function App() {
   const todos = todoIds
     .map((id) => todosById[id])
     .filter(Boolean)
-    .sort((a, b) => a.createdAt - b.createdAt);
+    .sort((a, b) => {
+      // sort by priority first, then by createdAt
+      if ("priority" in a && "priority" in b) {
+        if (a.priority !== b.priority) {
+          return (b.priority || 0) - (a.priority || 0); // higher priority first
+        }
+      } else if ("priority" in a) {
+        return 1; // a has priority, b doesn't
+      } else if ("priority" in b) {
+        return -1; // b has priority, a doesn't
+      }
+      return a.createdAt - b.createdAt;
+    });
+  
+  const quickStoryPoints = (e: React.KeyboardEvent) => {
+    const key = e.key;
+    if (possibleStoryPoints.includes(key)) {
+      setStoryPoint(key);
+      document.getElementById("normal-priority")?.focus();
+      e.preventDefault();
+    }
+  }
+  const quickPriority = (e: React.KeyboardEvent) => {
+    const key = e.key;
+    if( key === "1"){
+      setPriority("0");
+    }else if( key === "2"){
+      setPriority("1");
+    }else if( key === "3"){
+      setPriority("2");
+    }else {
+      return;
+    }
+    addTodo();
+    e.preventDefault();
+    //todo: focus to calendars if open and don't add todo
+  }
 
   return (
     <>
@@ -101,7 +166,7 @@ function App() {
           className="flex items-center gap-4 flex-grow"
           onSubmit={(e) => {
             e.preventDefault();
-            addTodo();
+            quickAddTodo(); // todo: add quick todo event to generate untagged todo
           }}
         >
           <Input
@@ -109,8 +174,9 @@ function App() {
             onChange={(e) => setNewTodo(e.target.value)}
             placeholder="Add a new todo..."
             className="flex-grow"
+            id="new-todo-title-input"
           />
-          <Button className="w-32" type="submit">
+          <Button className="w-32" type="submit" tabIndex={-1}>
             Quick Add
           </Button>
         </form>
@@ -129,8 +195,9 @@ function App() {
               type="single"
               variant={"outline"}
               value={storyPoint}
-              onValueChange={(val) => setStoryPoint(val || "1")}
+              onValueChange={(val) => setStoryPoint(val || "🤷")}
               className="flex w-auto"
+              onKeyDown={quickStoryPoints}
             >
               {possibleStoryPoints.map((val) => (
                 <ToggleGroupItem
@@ -149,8 +216,9 @@ function App() {
               type="single"
               variant={"outline"}
               value={priority}
-              onValueChange={(val) => setPriority(val || "1")}
+              onValueChange={(val) => setPriority(val)}
               className="flex w-auto"
+              onKeyDown={quickPriority}
             >
               <ToggleGroupItem
                 value="0"
@@ -161,6 +229,7 @@ function App() {
               <ToggleGroupItem
                 value="1"
                 className="flex items-center justify-center"
+                id="normal-priority"
               >
                 Normal
               </ToggleGroupItem>
@@ -168,7 +237,7 @@ function App() {
                 value="2"
                 className="flex items-center justify-center"
               >
-                Important
+                Frog
               </ToggleGroupItem>
             </ToggleGroup>
           </label>
@@ -221,6 +290,7 @@ function App() {
               todo={todo}
               toggleTodo={toggleTodo}
               deleteTodo={deleteTodo}
+              updateTodo={updateTodo}
             />
           ))
         )}

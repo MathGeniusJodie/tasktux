@@ -3,10 +3,6 @@
 /*---break---*/
 @custom-variant dark (&:is(.dark *));
 
-* {
-  contain: content;
-}
-
 /*---break---*/
 
 @theme inline {
