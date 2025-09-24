@@ -129,6 +129,7 @@ export const TodoListItem: React.FC<TodoProps> = ({ todo, toggleTodo, deleteTodo
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
+        {/* allow changing title of todo */}
       </PopoverContent>
     </Popover>
     <Button

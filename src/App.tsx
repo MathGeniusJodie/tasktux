@@ -21,8 +21,8 @@ function App() {
   const [todosById, setTodosById] = useLocalStorage("todos", {} as TodosById);
   const [todoIds, setTodoIds] = useState<string[]>(Object.keys(todosById));
   const [newTodo, setNewTodo] = useState<string>("");
-  const [storyPoint, setStoryPoint] = useState<string>("🤷");
-  const [priority, setPriority] = useState<string>("1");
+  const [storyPoint, setStoryPoint] = useState<string|undefined>(undefined);
+  const [priority, setPriority] = useState<string | undefined>(undefined);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
@@ -44,9 +44,9 @@ function App() {
 
     setTodosById((prev) => ({ ...prev, [id]: todo }));
     setTodoIds((prev) => [...prev, id]);
-    setPriority("1");
+    setPriority(undefined);
     setNewTodo("");
-    setStoryPoint("🤷");
+    setStoryPoint(undefined);
     setStartDate(undefined);
     setEndDate(undefined);
     // Focus back to input
@@ -157,6 +157,10 @@ function App() {
             <div className="bg-white border border-gray-300 rounded-xl px-6 py-3 shadow text-lg font-semibold text-gray-800 min-w-[200px] max-w-xs rounded-tr-none">
               {randomQuote}
             </div>
+          </div>
+          <div className="text-sm text-center">
+            <div className="font-bold">Points Completed:</div>
+            <div className="font-mono text-3xl">{todos.reduce((acc, todo) => acc + (todo.completed ? "storyPoints" in todo && todo.storyPoints || 1 : 0), 0)}</div>
           </div>
         </div>
       </header>
