@@ -7,7 +7,7 @@ import { Switch } from "./components/ui/switch";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { Calendar } from "./components/ui/calendar";
 import { penguinQuotes } from "./penguinQuotes";
-import { Settings } from "lucide-react";
+import { Settings, Download, Import } from "lucide-react";
 import { add } from "date-fns";
 
 const possibleStoryPoints = ["🤷", "1", "2", "3", "5", "8"];
@@ -146,9 +146,44 @@ function App() {
     <>
       <header className="flex flex-col items-center gap-2 py-6 w-full">
         <div className="flex items-center gap-4 flex-row-reverse justify-between w-full">
-          <button>
-            <Settings className="h-6 w-6 text-yellow-500" />
-          </button>
+          {/*<button>
+            <Settings className="h-6 w-6 dark:text-yellow-500" />
+          </button>*/}
+          <div className="flex gap-2 flex-col">
+            <Button onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = '.json';
+              input.onchange = (e: any) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  try {
+                    const importedTodos = JSON.parse(event.target?.result as string);
+                    setTodosById(importedTodos.todos);
+                    setTodoIds(Object.keys(importedTodos.todos));
+                  } catch (error) {
+                    console.error("Error importing todos:", error);
+                  }
+                };
+                reader.readAsText(file);
+              };
+              input.click();
+            }}>
+              Import
+            </Button>
+            <Button onClick={() => {
+              const downloadAnchorNode = document.createElement('a');
+              const obj = {todos: todosById};
+              downloadAnchorNode.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj)));
+              downloadAnchorNode.setAttribute("download", "todos.json");
+              document.body.appendChild(downloadAnchorNode); // required for firefox
+              downloadAnchorNode.click();
+              downloadAnchorNode.remove();
+            }}>
+              Export
+            </Button>
+          </div>
           <div className="flex items-center flex-row-reverse gap-4">
           <span
             style={{ fontSize: "4rem" }}
@@ -170,17 +205,22 @@ function App() {
         </div>
       </header>
 
-      <div className="text-xl border-white border-3 bg-black px-3 rounded-xl relative font-bold -mb-15 -mx-10 w-max">Do This First!</div>
+      
+      
+      {(todos.length > 0 && todos[0].completed === false)?
+      <>
+      <div className="text-xl dark:border-white border-orange-700 border-3 dark:bg-black bg-white px-3 rounded-xl relative font-bold -mb-15 -mx-10 w-max">Do This First!</div>
       <TodoListItem
         todo={todos[0]}
         toggleTodo={toggleTodo}
         deleteTodo={deleteTodo}
         updateTodo={updateTodo}
         //box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-        className="border-4 rounded-lg my-10 border-white -mx-14 h-28 p-8 gap-6 shadow-[0_0_30px_var(--color-yellow-900)] inset-shadow-[0_0_30px_var(--color-yellow-900)]"
+        className="border-4 rounded-lg my-10 border-orange-700 dark:border-white -mx-14 h-28 p-8 gap-6 dark:shadow-[0_0_30px_var(--color-yellow-900)] dark:inset-shadow-[0_0_30px_var(--color-yellow-900)]"
         labelClassName="text-2xl"
-        checkClassName="size-8 border-3 border-white"
+        checkClassName="size-8 border-3 border-foreground dark:border-white"
       />
+      </> : <p className="mb-4">You have no undone todos! </p>}
 
       <div className="flex gap-4 flex-col border-4 p-4 rounded-lg mb-4 border-yellow-400">
         <form
@@ -203,7 +243,7 @@ function App() {
           </Button>
         </form>
         <form
-          className="flex flex-col gap-4 py-4"
+          className="flex flex-col gap-4 pt-4"
           onSubmit={(e) => {
             e.preventDefault();
             addTodo();
@@ -263,7 +303,7 @@ function App() {
               </ToggleGroupItem>
             </ToggleGroup>
           </label>
-          <details>
+          <details hidden>
             <summary>Dates</summary>
             <div className="flex items-center gap-2">
               <label className="flex flex-col justify-stretch gap-2">
