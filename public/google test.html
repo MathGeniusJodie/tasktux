@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Google Drive Upload Demo</title>
+  </head>
+  <body>
+    <div id="g_id_onload"
+         data-client_id="524670664079-4p0pks0klsq0hdlh1776j8dvjnipkgoi.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin" data-type="standard"></div>
+
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script>
+      function handleCredentialResponse(response) {
+        console.log(response);
+      }
+      (() => {
+        const clientId =
+          document.querySelector('meta[name="google-signin-client_id"]')?.content ||
+          document.getElementById('g_id_onload')?.dataset.clientId;
+
+        let accessToken = null;
+
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'https://www.googleapis.com/auth/drive.file',
+          callback: (resp) => {
+            if (resp.error) {
+              console.error(resp);
+              return;
+            }
+            accessToken = resp.access_token;
+          },
+        });
+
+        async function uploadTextFile(content, filename = 'note.txt', mimeType = 'text/plain') {
+          const boundary = '-------314159' + Math.random().toString(36).slice(2);
+          const metadata = { name: filename, mimeType };
+          const body =
+            `--${boundary}\r\n` +
+            'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+            JSON.stringify(metadata) + '\r\n' +
+            `--${boundary}\r\n` +
+            `Content-Type: ${mimeType}\r\n\r\n` +
+            content + '\r\n' +
+            `--${boundary}--`;
+
+          const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: {
+              Authorization: 'Bearer ' + accessToken,
+              'Content-Type': 'multipart/related; boundary=' + boundary,
+            },
+            body,
+          });
+
+          if (!res.ok) {
+            const err = await res.text();
+            throw new Error(err || res.statusText);
+          }
+
+          const json = await res.json();
+          return json.id;
+        }
+
+        const btn = document.createElement('button');
+        btn.textContent = 'Save text to Google Drive';
+        btn.addEventListener('click', () => {
+          tokenClient.callback = async (resp) => {
+            if (resp.error) {
+              console.error(resp);
+              return;
+            }
+            accessToken = resp.access_token;
+            try {
+              const id = await uploadTextFile(
+                'Sample text saved at ' + new Date().toISOString(),
+                `note-${Date.now()}.txt`
+              );
+              console.log('Uploaded file ID:', id);
+              alert('Saved to Drive. File ID: ' + id);
+            } catch (e) {
+              console.error(e);
+              alert('Upload failed');
+            }
+          };
+          tokenClient.requestAccessToken({ prompt: accessToken ? '' : 'consent' });
+        });
+
+        document.body.appendChild(btn);
+      })();
+    </script>
+
+

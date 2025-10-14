@@ -68,6 +68,8 @@ function App() {
     setTodosById((prev) => ({ ...prev, [id]: todo }));
     setTodoIds((prev) => [...prev, id]);
     setNewTodo("");
+    setPriority(undefined);
+    setStoryPoint(undefined);
     // Focus back to input
     document.getElementById("new-todo-title-input")?.focus();
   };
@@ -130,16 +132,15 @@ function App() {
     const key = e.key;
     if( key === "1"){
       setPriority("0");
+      addTodo();
     }else if( key === "2"){
       setPriority("1");
+      addTodo();
     }else if( key === "3"){
       setPriority("2");
-    }else {
-      return;
+      addTodo();
     }
-    addTodo();
     e.preventDefault();
-    //todo: focus to calendars if open and don't add todo
   }
 
   return (
