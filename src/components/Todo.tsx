@@ -2,7 +2,7 @@ import React from "react";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import { Trash } from "lucide-react";
+//import { Trash } from "lucide-react";
 import { Pencil } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";

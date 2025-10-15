@@ -3,12 +3,12 @@ import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { Todo, TodoListItem } from "./components/Todo";
 import { ToggleGroup, ToggleGroupItem } from "./components/ui/toggle-group";
-import { Switch } from "./components/ui/switch";
+//import { Switch } from "./components/ui/switch";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { Calendar } from "./components/ui/calendar";
 import { penguinQuotes } from "./penguinQuotes";
-import { Settings, Download, Import } from "lucide-react";
-import { add } from "date-fns";
+//import { Settings, Download, Import } from "lucide-react";
+//import { add } from "date-fns";
 
 const possibleStoryPoints = ["🤷", "1", "2", "3", "5", "8"];
 
@@ -155,8 +155,10 @@ function App() {
               const input = document.createElement('input');
               input.type = 'file';
               input.accept = '.json';
-              input.onchange = (e: any) => {
-                const file = e.target.files[0];
+              input.onchange = (e: Event) => {
+                const target = e.target as HTMLInputElement;
+                if (!target.files) return;
+                const file = target.files[0];
                 const reader = new FileReader();
                 reader.onload = (event) => {
                   try {
